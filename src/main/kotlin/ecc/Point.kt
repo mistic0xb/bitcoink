@@ -1,14 +1,12 @@
 package org.mist.ecc
 
-import kotlin.math.pow
-
 /*
 [secp256k1]
 y^2 = x^3 + ax + b
 y^2 = x^3 + 7
 here, a = 0, b = 7
 */
-data class Point(val x: Double?, val y: Double?, val a: Double, val b: Double) {
+data class Point(val x: FieldElement?, val y: FieldElement?, val a: FieldElement, val b: FieldElement) {
     init {
         if (x != null && y != null) {
             if (y.pow(2) != x.pow(3) + a * x + b) {
@@ -58,8 +56,8 @@ data class Point(val x: Double?, val y: Double?, val a: Double, val b: Double) {
 
         // P1 == P2
         if (this == other) {
-            val slope = (3 * x.pow(2) + a) / (2 * y!!)
-            val x3 = slope.pow(2) - 2 * x
+            val slope = (FieldElement(3,x.prime) * x.pow(2) + a) / (FieldElement(2,y!!.prime) * y)
+            val x3 = slope.pow(2) - FieldElement(2,x.prime) * x
             val y3 = slope * (x - x3) - y
             return Point(
                 x = x3,
@@ -70,7 +68,7 @@ data class Point(val x: Double?, val y: Double?, val a: Double, val b: Double) {
         }
 
         // P1 == P2 && y == 0
-        if (this == other && y == 0.0) {
+        if (this == other && y?.num == 0) {
             return Point(
                 x = null,
                 y = null,
