@@ -2,11 +2,16 @@ package org.mist.ecc
 
 import java.math.BigInteger
 
-data class FieldElement(val num: Int, val prime: Int) {
+data class FieldElement(val num: BigInteger, val prime: BigInteger) {
+    constructor(num: Int, prime: Int) : this(
+        num = BigInteger.valueOf(num.toLong()),
+        prime = BigInteger.valueOf(prime.toLong())
+    )
+
     init {
-        if (num >= prime || num < 0) {
+        if (num >= prime || num < BigInteger.ZERO) {
             throw IllegalArgumentException(
-                "Num $num not in field range 0 to ${prime - 1}"
+                "Num $num not in field range 0 to ${prime - BigInteger.ONE}"
             )
         }
     }
@@ -15,9 +20,9 @@ data class FieldElement(val num: Int, val prime: Int) {
         return "FieldElement_$prime($num)"
     }
 
-    private fun mod(value: Int, modulus: Int): Int {
+    private fun mod(value: BigInteger, modulus: BigInteger): BigInteger {
         val result = value % modulus
-        if (result < 0) {
+        if (result < BigInteger.ZERO) {
             return result + modulus
         } else {
             return result
@@ -60,16 +65,16 @@ data class FieldElement(val num: Int, val prime: Int) {
                 "Cannot divide two numbers in different Fields"
             )
         }
-        val res = mod((num * (other.pow(prime - 2).num)), prime)
+        val res = mod((num * (other.pow(prime - 2.toBigInteger()).num)), prime)
         return FieldElement(res, prime)
     }
 
-    fun pow(exp: Int): FieldElement {
-        val n = mod(exp, (prime - 1))
+    fun pow(exp: BigInteger): FieldElement {
+        val n = mod(exp, (prime - BigInteger.ONE))
         val base = BigInteger.valueOf(num.toLong())
         val mod = BigInteger.valueOf(prime.toLong())
         val positiveExpo = BigInteger.valueOf(n.toLong())
         val res = (base.modPow(positiveExpo, mod))
-        return FieldElement(res.toInt(), prime)
+        return FieldElement(res, prime)
     }
 }
